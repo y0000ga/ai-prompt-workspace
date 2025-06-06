@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Yoga Notes Sidebar",
+  "version": "1.0",
+  "description": "A note-taking extension in the Chrome sidebar.",
+  "permissions": ["storage", "sidePanel"],
+  "action": {
+    "default_title": "Toggle Notes"
+  },
+  "background": {
+    "service_worker": "assets/background.js"
+  },
+  "side_panel": {
+    "default_path": "index.html"
+  },
+  "host_permissions": ["<all_urls>"]
+}

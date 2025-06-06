@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["DOM", "ES2020"],
+    "types": ["vite/client", "chrome-types"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "@components/*": ["src/sidepanel/components/*"],
+      "@utils/*": ["src/sidepanel/utils/*"],
+      "@styles/*": ["src/sidepanel/styles/*"],
+      "@constants/*": ["src/sidepanel/constants/*"],
+      "@hooks/*": ["src/sidepanel/hooks/*"],
+      "@types/*": ["src/sidepanel/types/*"]
+    }
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}
