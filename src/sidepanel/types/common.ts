@@ -5,3 +5,9 @@ export enum ChromeStorage {
 export interface IChromeStorage {
   [ChromeStorage.Note]: string;
 }
+
+export interface IStatusItem {
+  title: string;
+  status: string;
+  history: { time: string; description: string }[];
+}

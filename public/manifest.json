@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Yoga Notes Sidebar",
+  "name": "Status Notepad Sidebar",
   "version": "1.0",
-  "description": "A note-taking extension in the Chrome sidebar.",
-  "permissions": ["storage", "sidePanel"],
+  "description": "A lightweight Chrome extension for tracking task statuses and event handling in a side panel notepad.",
+  "permissions": ["storage", "sidePanel", "contextMenus"],
   "action": {
     "default_title": "Toggle Notes"
   },

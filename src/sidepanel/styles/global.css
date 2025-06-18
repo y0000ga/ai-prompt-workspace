@@ -1,6 +1,11 @@
 @import "tailwindcss";
+@plugin "@iconify/tailwind4";
 
 :root {
-  @apply bg-black text-white;
-  
+  @apply bg-black text-white; 
+}
+
+.iconify {
+  display: inline-block;
+  vertical-align: middle;
 }
