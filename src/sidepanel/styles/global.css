@@ -2,7 +2,7 @@
 @plugin "@iconify/tailwind4";
 
 :root {
-  @apply bg-black text-white; 
+  @apply bg-black text-gray-600;
 }
 
 .iconify {

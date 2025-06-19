@@ -1,5 +1,7 @@
 export enum ChromeStorage {
   Note = "Note",
+  StatusOptions = "StatusOptions",
+  TimeOptions = "TimeOptions",
 }
 
 export interface IChromeStorage {
@@ -7,7 +9,16 @@ export interface IChromeStorage {
 }
 
 export interface IStatusItem {
+  id: string,
   title: string;
   status: string;
   history: { time: string; description: string }[];
+  sort: number;
+  isPinned: boolean;
+  forceCollapse?: boolean;
+}
+
+export interface ITag {
+  label: string;
+  value: string;
 }
