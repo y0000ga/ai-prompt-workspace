@@ -21,6 +21,8 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "classnames": "^2.5.1",
+    "emoji-mart": "^5.6.0",
+    "emoji-picker-react": "^4.12.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

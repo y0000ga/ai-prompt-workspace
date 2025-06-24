@@ -61,7 +61,7 @@ const App = () => {
   });
 
   const [isOpenSetting, setIsOpenSetting] = useState(false);
-  const [isStatusSetting, setIsStatusSetting] = useState(false);
+  const [isStatusSetting, setIsStatusSetting] = useState(true);
   const [isTimeSetting, setIsTimeSetting] = useState(false);
 
   const pinnedNote = useMemo(() => note.filter((item) => item.isPinned), [note]);
@@ -220,10 +220,8 @@ const App = () => {
           onClose={() => {
             setIsTimeSetting(false);
           }}
-          onDelete={({ label, value }) => {
-            setTimeOptions((prev) =>
-              prev.filter((item) => item.label !== label && item.value !== value)
-            );
+          onDelete={(index) => {
+            setStatusOptions((prev) => prev.filter((_, idx) => index !== idx));
           }}
           options={timeOptions}
           onAdd={({ label, value }) => {
@@ -231,6 +229,11 @@ const App = () => {
               const isExisted = prev.find((item) => item.label === label && item.value === value);
               return isExisted ? prev : [...prev, { label, value }];
             });
+          }}
+          onEdit={(index, { label, value }) => {
+            setTimeOptions((prev) =>
+              prev.map((item, idx) => (idx === index ? { label, value } : item))
+            );
           }}
         />
       )}
@@ -241,16 +244,19 @@ const App = () => {
             setIsStatusSetting(false);
           }}
           options={statusOptions}
-          onDelete={({ label, value }) => {
-            setStatusOptions((prev) =>
-              prev.filter((item) => item.label !== label && item.value !== value)
-            );
+          onDelete={(index) => {
+            setStatusOptions((prev) => prev.filter((_, idx) => index !== idx));
           }}
           onAdd={({ label, value }) => {
             setStatusOptions((prev) => {
               const isExisted = prev.find((item) => item.label === label && item.value === value);
               return isExisted ? prev : [...prev, { label, value }];
             });
+          }}
+          onEdit={(index, { label, value }) => {
+            setStatusOptions((prev) =>
+              prev.map((item, idx) => (idx === index ? { label, value } : item))
+            );
           }}
         />
       )}
