@@ -1,17 +1,14 @@
 import { useMemo, useState } from "react";
 import classNames from "classnames";
 
-import StatusItem from "@/sidepanel/components/StatusItem";
-import AddStatus from "@/sidepanel/components/AddStatus";
-import StatusSetting from "@/sidepanel/components/StatusSetting";
-import useChromeStorage from "@/sidepanel/hooks/useChromeStorage";
-import { ChromeStorage, IStatusItem, ITag } from "@/sidepanel/types/common";
-import {
-  DEFAULT_NOTE,
-  DEFAULT_STATUS_OPTIONS,
-  DEFAULT_TIME_OPTIONS,
-} from "@/sidepanel/utils/constants";
+import StatusItem from "@/sidepanel/components/Event/ListItem";
+import AddStatus from "@/sidepanel/components/Event/NewItem";
+import { IEvent } from "@/sidepanel/types/common";
 import SortableList from "@/sidepanel/components/SortableList";
+
+import { useStatusOptions } from "./context/statusOption";
+import { useNote } from "./context/note";
+import StatusSettingModal from "./components/StatusSettingModal";
 
 // TODO: 狀態 filter
 // TODO: 每日快照
@@ -25,172 +22,136 @@ import SortableList from "@/sidepanel/components/SortableList";
 // TODO: Google Calendar 匯出與匯入 (OAuth/Google Calendar API)
 // TODO: 進度視覺化
 
+const genStatus = ({ status, title, sort }: Pick<IEvent, "status" | "title" | "sort">) => ({
+  id: new Date().getTime().toString(),
+  status,
+  title,
+  history: [],
+  sort,
+  isPinned: false,
+});
+
+const genSortId = ({ sort, isPinned }: IEvent) => `${sort}-${isPinned ? "p" : "u"}`;
+
 const App = () => {
   const {
-    value: note,
-    handleSaveStorage: handleSaveNoteStorage,
+    note,
+    add: addNote,
+    setAll: setAllNote,
+    load: loadNote,
+    save: saveNote,
     isLoading: isNoteLoading,
-    handleLoadStorage: handleLoadNoteStorage,
-    isSaving,
-    setValue: setNote,
-  } = useChromeStorage<IStatusItem[]>({
-    defaultValue: DEFAULT_NOTE,
-    key: ChromeStorage.Note,
-  });
+    isSaving: isNoteSaving,
+  } = useNote();
 
   const {
-    value: timeOptions,
-    handleSaveStorage: handleSaveTimeOptionsStorage,
-    handleLoadStorage: handleLoadTimeOptionsStorage,
-    setValue: setTimeOptions,
-    isLoading: isTimeOptionsLoading,
-  } = useChromeStorage<ITag[]>({
-    defaultValue: DEFAULT_TIME_OPTIONS,
-    key: ChromeStorage.TimeOptions,
-  });
-
-  const {
-    value: statusOptions,
-    handleSaveStorage: handleSaveStatusOptionsStorage,
-    handleLoadStorage: handleLoadStatusOptionsStorage,
-    setValue: setStatusOptions,
+    statusOptions,
+    save: saveStatusOption,
+    load: loadStatusOption,
+    isSaving: isStatusOptionsSaving,
     isLoading: isStatusOptionsLoading,
-  } = useChromeStorage<ITag[]>({
-    defaultValue: DEFAULT_STATUS_OPTIONS,
-    key: ChromeStorage.TimeOptions,
-  });
+  } = useStatusOptions();
 
   const [isOpenSetting, setIsOpenSetting] = useState(false);
-  const [isStatusSetting, setIsStatusSetting] = useState(true);
-  const [isTimeSetting, setIsTimeSetting] = useState(false);
+  const [isStatusSetting, setIsStatusSetting] = useState(false);
 
   const pinnedNote = useMemo(() => note.filter((item) => item.isPinned), [note]);
 
   const unpinnedNote = useMemo(() => note.filter((item) => !item.isPinned), [note]);
 
-  const isLoading = useMemo(() => {
-    return isNoteLoading || isTimeOptionsLoading || isStatusOptionsLoading;
-  }, [isNoteLoading, isTimeOptionsLoading, isStatusOptionsLoading]);
+  const isLoading = useMemo(
+    () => isNoteLoading || isStatusOptionsLoading,
+    [isNoteLoading, isStatusOptionsLoading]
+  );
+
+  const isSaving = useMemo(
+    () => isNoteSaving || isStatusOptionsSaving,
+    [isNoteSaving, isStatusOptionsSaving]
+  );
+
+  const buttonOptions = useMemo(
+    () =>
+      isOpenSetting
+        ? [
+            {
+              icon: "icon-[mdi--settings]",
+              onClick: () => {
+                setIsStatusSetting(true);
+              },
+            },
+            {
+              icon: "icon-[mdi--export-variant]",
+              onClick: () => {},
+            },
+            {
+              icon: "icon-[mdi--hamburger-close]",
+              onClick: () => {
+                setIsOpenSetting((prev) => !prev);
+              },
+            },
+          ]
+        : [
+            {
+              icon: "icon-[mdi--hamburger-open]",
+              onClick: () => {
+                setIsOpenSetting((prev) => !prev);
+              },
+            },
+          ],
+    [isOpenSetting]
+  );
 
   return (
     <>
       <div className="flex h-screen max-h-screen flex-1 flex-col gap-4 overflow-hidden overflow-x-hidden bg-zinc-50 py-4">
         <div className={classNames("flex items-center justify-end gap-4 px-4")}>
-          {isOpenSetting ? (
-            <>
-              <button
-                aria-label="setting status setting"
-                className="icon-[mdi--settings] text-xl text-gray-600"
-                onClick={() => {
-                  setIsStatusSetting(true);
-                }}
-              ></button>
-              <button
-                aria-label="setting time options"
-                className="icon-[mdi--sun-clock] text-xl text-gray-600"
-                onClick={() => {
-                  setIsTimeSetting(true);
-                }}
-              ></button>
-              <button
-                aria-label="export"
-                className="icon-[mdi--export-variant] cursor-pointer text-xl text-gray-600"
-              ></button>
-              <button
-                aria-label="open setting"
-                onClick={() => {
-                  setIsOpenSetting((prev) => !prev);
-                }}
-                className="icon-[mdi--hamburger-close] cursor-pointer text-xl text-gray-600"
-              ></button>
-            </>
-          ) : (
-            <div
-              onClick={() => {
-                setIsOpenSetting((prev) => !prev);
-              }}
-              className="icon-[mdi--hamburger-open] cursor-pointer text-xl text-gray-600"
-            ></div>
-          )}
+          {buttonOptions.map(({ icon, onClick }) => (
+            <button
+              key={icon}
+              className={classNames("cursor-pointer text-xl text-gray-600", icon)}
+              onClick={onClick}
+            ></button>
+          ))}
         </div>
 
         <AddStatus
           onAdd={(title) => {
-            if (!title) {
-              return;
-            }
-            setNote((prev) => [
-              ...prev,
-              {
-                id: new Date().getTime().toString(),
+            addNote(
+              genStatus({
                 status: statusOptions[0].value,
                 title,
-                history: [],
-                sort: prev.length,
-                isPinned: false,
-              },
-            ]);
+                sort: note.length,
+              })
+            );
           }}
         />
+
         <div className="flex flex-grow flex-col gap-4 overflow-x-hidden overflow-y-auto px-4">
-          <SortableList<IStatusItem>
+          <SortableList<IEvent>
             items={pinnedNote}
-            onChange={(newList) => {
-              const updated = newList.map((item, idx) => ({ ...item, sort: idx }));
-              setNote([...unpinnedNote, ...updated]);
+            onChange={(changedList) => {
+              const updated = changedList.map((item, index) => ({ ...item, sort: index }));
+              setAllNote([...unpinnedNote, ...updated]);
             }}
-            getId={(item) => `${item.sort}-${item.isPinned ? "p" : "u"}`}
-            render={(renderItem) => (
-              <StatusItem
-                {...renderItem}
-                onDelete={() => {
-                  setNote((prev) => prev.filter((prevItem) => prevItem.id !== renderItem.id));
-                }}
-                onEdit={(updatedContent) => {
-                  setNote((prev) =>
-                    prev.map((item) =>
-                      item.id === renderItem.id ? { ...item, ...updatedContent } : item
-                    )
-                  );
-                }}
-                statusOptions={statusOptions}
-                timeOptions={timeOptions}
-              />
-            )}
+            getId={genSortId}
+            render={(renderItem) => <StatusItem {...renderItem} />}
           />
-          <SortableList<IStatusItem>
+          <SortableList<IEvent>
             items={unpinnedNote}
-            onChange={(newList) => {
-              const updated = newList.map((item, idx) => ({ ...item, sort: idx }));
-              setNote([...pinnedNote, ...updated]);
+            onChange={(changedList) => {
+              const updated = changedList.map((item, index) => ({ ...item, sort: index }));
+              setAllNote([...pinnedNote, ...updated]);
             }}
-            getId={(item) => `${item.sort}-${item.isPinned ? "p" : "u"}`}
-            render={(renderItem) => (
-              <StatusItem
-                {...renderItem}
-                onDelete={() => {
-                  setNote((prev) => prev.filter((prevItem) => prevItem.id !== renderItem.id));
-                }}
-                onEdit={(updatedContent) => {
-                  setNote((prev) =>
-                    prev.map((item) =>
-                      renderItem.id === item.id ? { ...item, ...updatedContent } : item
-                    )
-                  );
-                }}
-                statusOptions={statusOptions}
-                timeOptions={timeOptions}
-              />
-            )}
+            getId={genSortId}
+            render={(renderItem) => <StatusItem {...renderItem} />}
           />
         </div>
         <div className="mx-4 flex items-center justify-end gap-4 px-4">
           {!isLoading && (
             <button
               onClick={() => {
-                handleLoadNoteStorage();
-                handleLoadTimeOptionsStorage();
-                handleLoadStatusOptionsStorage;
+                loadNote();
+                loadStatusOption();
               }}
               className="icon-[mdi--download-box] text-xl text-zinc-600"
             />
@@ -198,65 +159,24 @@ const App = () => {
           {!isSaving && (
             <button
               onClick={() => {
-                handleSaveNoteStorage();
-                handleSaveTimeOptionsStorage();
-                handleSaveStatusOptionsStorage();
+                saveNote();
+                saveStatusOption();
               }}
               className="icon-[mdi--content-save] text-xl text-gray-600"
             />
           )}
-          <span
+          <button
             className={classNames(
               "text-xl text-gray-600",
               isSaving ? "icon-[mdi--autorenew]" : "icon-[mdi--done-all]"
             )}
-          ></span>
+          />
         </div>
       </div>
-
-      {isTimeSetting && (
-        <StatusSetting
-          title="設定時間"
-          onClose={() => {
-            setIsTimeSetting(false);
-          }}
-          onDelete={(index) => {
-            setStatusOptions((prev) => prev.filter((_, idx) => index !== idx));
-          }}
-          options={timeOptions}
-          onAdd={({ label, value }) => {
-            setTimeOptions((prev) => {
-              const isExisted = prev.find((item) => item.label === label && item.value === value);
-              return isExisted ? prev : [...prev, { label, value }];
-            });
-          }}
-          onEdit={(index, { label, value }) => {
-            setTimeOptions((prev) =>
-              prev.map((item, idx) => (idx === index ? { label, value } : item))
-            );
-          }}
-        />
-      )}
       {isStatusSetting && (
-        <StatusSetting
-          title="設定狀態"
+        <StatusSettingModal
           onClose={() => {
             setIsStatusSetting(false);
-          }}
-          options={statusOptions}
-          onDelete={(index) => {
-            setStatusOptions((prev) => prev.filter((_, idx) => index !== idx));
-          }}
-          onAdd={({ label, value }) => {
-            setStatusOptions((prev) => {
-              const isExisted = prev.find((item) => item.label === label && item.value === value);
-              return isExisted ? prev : [...prev, { label, value }];
-            });
-          }}
-          onEdit={(index, { label, value }) => {
-            setStatusOptions((prev) =>
-              prev.map((item, idx) => (idx === index ? { label, value } : item))
-            );
           }}
         />
       )}

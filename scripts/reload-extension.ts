@@ -1,4 +1,3 @@
-import fs from "fs";
 import path from "path";
 
 import chokidar from "chokidar";
@@ -16,14 +15,14 @@ const reloadExtension = async () => {
     const extensionTarget = targets.find((t) => t.title.includes(EXTENSION_NAME));
 
     if (!extensionTarget) {
-      console.warn("⚠️ 找不到 Extension，請確認已載入並啟用");
+      console.warn("⚠️ Extension Not Found");
       return;
     }
 
     await fetch(`http://localhost:9222/json/reload/${extensionTarget.id}`);
     console.log("🔁 Extension reloaded!");
   } catch (err) {
-    console.error("❌ 無法連接到 Chrome Debug API:", err);
+    console.error("❌Can not connect Chrome Debug API:", err);
   }
 };
 

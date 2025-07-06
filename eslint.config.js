@@ -8,6 +8,8 @@ import prettierConfig from "eslint-config-prettier";
 import tseslint from "typescript-eslint";
 import { register } from "ts-node";
 
+import * as noHardcodedChinesePlugin from "./eslint-rules/no-hardcoded-chinese.js";
+
 register();
 
 export default tseslint.config(
@@ -37,6 +39,7 @@ export default tseslint.config(
       prettier: prettier,
       import: importPlugin,
       prettier,
+      "no-hardcoded-chinese": noHardcodedChinesePlugin
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -47,15 +50,7 @@ export default tseslint.config(
       "import/order": [
         "warn",
         {
-          groups:
-            [
-              "builtin",
-              "external",
-              "internal",
-              "parent",
-              "sibling",
-              "index"
-            ],
+          groups: ["builtin", "external", "internal", "parent", "sibling", "index"],
           "newlines-between": "always",
         },
       ],
@@ -69,6 +64,7 @@ export default tseslint.config(
           ImportDeclaration: { minItems: 3 },
         },
       ],
+      "no-hardcoded-chinese/no-hardcoded-chinese": "error",
     },
   },
   {

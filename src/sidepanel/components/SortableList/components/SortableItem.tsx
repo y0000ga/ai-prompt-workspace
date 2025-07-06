@@ -19,9 +19,12 @@ const SortableItem = ({ id, children }: PropsWithChildren<SortableItemProps>) =>
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className="relative flex cursor-grab flex-col rounded-md border border-zinc-200 bg-zinc-50 p-4 shadow-xl"
+      className="relative flex w-full max-w-full flex-col rounded-md border border-zinc-200 bg-zinc-50 p-4 shadow-xl"
     >
-      <div className="icon-[mdi--drag] absolute top-4 left-4 text-xl" {...listeners}></div>
+      <div className="absolute -top-3 -left-2 flex cursor-grab items-center justify-center rounded-full border border-zinc-200 bg-white">
+        <button className="icon-[mdi--drag] !cursor-grab text-xl" {...listeners} />
+      </div>
+
       {children}
     </li>
   );

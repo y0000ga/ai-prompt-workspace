@@ -13,9 +13,10 @@ const useChromeStorage = <T>({ defaultValue, key }: { defaultValue: T; key: Chro
       try {
         setIsLoading(true);
         const loadedValue = await loadStorage(key);
+        console.info(loadedValue)
         setValue(loadedValue ? JSON.parse(loadedValue) : defaultValue);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       } finally {
         setIsLoading(false);
       }
@@ -24,16 +25,18 @@ const useChromeStorage = <T>({ defaultValue, key }: { defaultValue: T; key: Chro
     load();
   }, [defaultValue, key]);
 
-  const handleSaveStorage = useCallback(async () => {
-    try {
-      setIsSaving(true);
-      await saveStorage({ key, value: JSON.stringify(value) });
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [key, value]);
+  const handleSaveStorage = useCallback(
+    async (updatedValue: unknown[]) => {
+      try {
+        setIsSaving(true);
+        await saveStorage({ key, value: JSON.stringify(updatedValue) });
+      } catch (error) {
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [key]
+  );
 
   const handleLoadStorage = useCallback(async () => {
     try {
@@ -43,7 +46,7 @@ const useChromeStorage = <T>({ defaultValue, key }: { defaultValue: T; key: Chro
         setValue(JSON.parse(loadedValue));
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setIsLoading(false);
     }

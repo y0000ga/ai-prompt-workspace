@@ -17,7 +17,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useState } from "react";
 
-import SortableItem from "@/sidepanel/components/SortableItem";
+import SortableItem from "@/sidepanel/components/SortableList/components/SortableItem";
 
 type Props<T> = {
   items: T[];
@@ -64,7 +64,7 @@ const SortableList = <T,>({ items, onChange, getId, render, disabled = false }: 
         strategy={verticalListSortingStrategy}
         disabled={disabled}
       >
-        <ul className="space-y-2">
+        <ul className="relative w-full max-w-full space-y-2">
           {items.map((item) => (
             <SortableItem key={getId(item)} id={getId(item)}>
               {render({ ...item, forceCollapse: !!activeId })}

@@ -1,18 +1,22 @@
 export enum ChromeStorage {
   Note = "Note",
   StatusOptions = "StatusOptions",
-  TimeOptions = "TimeOptions",
 }
 
 export interface IChromeStorage {
   [ChromeStorage.Note]: string;
 }
 
-export interface IStatusItem {
-  id: string,
+export interface IHistory {
+  time: Date;
+  description: string;
+}
+
+export interface IEvent {
+  id: string;
   title: string;
   status: string;
-  history: { time: string; description: string }[];
+  history: IHistory[];
   sort: number;
   isPinned: boolean;
   forceCollapse?: boolean;

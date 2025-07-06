@@ -9,3 +9,28 @@
   display: inline-block;
   vertical-align: middle;
 }
+
+input, select, textarea {
+  @apply border-none focus:ring-0 focus:outline-none;
+}
+
+.no-calendar-icon::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+button {
+  @apply cursor-pointer;
+
+  &:disabled{
+    @apply cursor-not-allowed text-gray-400 bg-gray-400;
+  }
+}
+
+/* .flatpickr-time {
+  display: none !important;
+} */
+
+.flatpickr-calendar {
+  width: auto !important;
+}

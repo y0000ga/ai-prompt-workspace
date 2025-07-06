@@ -3,11 +3,11 @@ import { ContextMenuId } from "@/background/types/contextMenus";
 export const ContextMenusOptions = [
   {
     id: ContextMenuId.visitGithub,
-    title: "查看 Github",
+    title: "Check Github",
   },
   {
     id: ContextMenuId.chromeExtension,
-    title: "前往擴充功能頁面",
+    title: "Go Extension",
   },
 ];
 

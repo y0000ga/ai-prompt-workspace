@@ -1,11 +1,11 @@
-import { ChromeStorage, IChromeStorage } from "../types/common";
+import { ChromeStorage } from "../types/common";
 
 export const loadStorage = async (key: ChromeStorage) => {
   try {
-    const res = await chrome?.storage?.local?.get<IChromeStorage>([key]);
+    const res = await chrome?.storage?.local?.get([key]);
     return res[key];
   } catch (error) {
-    console.log("There is load Note Error: " + error);
+    console.error("There is load Note Error: " + error);
     return "";
   }
 };
@@ -15,7 +15,7 @@ export const saveStorage = async ({ key, value }: { key: ChromeStorage; value: s
     await chrome?.storage?.local?.set({ [key]: value });
     return true;
   } catch (error) {
-    console.log("There is save Note Error: " + error);
+    console.error("There is save Note Error: " + error);
     return false;
   }
 };
