@@ -1,55 +1,94 @@
-# React + TypeScript + Vite
+# Status Notepad Sidebar
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A lightweight Chrome Side Panel extension for tracking tasks, statuses, and history notes. It supports pinning, drag-and-drop ordering, customizable status options, and timeline entries. Data is stored in `chrome.storage`.
 
-Currently, two official plugins are available:
+**Great for**
+- Keeping quick notes while browsing
+- Tracking item status and progress (e.g., In Progress, Done, Blocked)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Key Features**
+- Side Panel note list
+- Customizable status labels
+- Pinned / unpinned sections
+- Drag-and-drop sorting within each section
+- History entries with time + description
+- Manual load / save to `chrome.storage`
+- Action context menu links
 
-## Expanding the ESLint configuration
+**Tech Stack**
+- React 19 + TypeScript
+- Vite 6
+- Tailwind CSS 4
+- @dnd-kit (drag-and-drop)
+- flatpickr (date/time picker)
+- dayjs (time utilities)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+**Requirements**
+- Chrome with Side Panel API support (recommended 114+)
+- Node.js 18+
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+**Quick Start**
+1. Install dependencies
+
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Development build (watch to `dist`)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+npm run dev
 ```
-# note-sidebar-extension
+
+3. Auto-reload the extension on build changes (requires Chrome remote debugging)
+
+```bash
+npm run watch:reload
+```
+
+Or use both together:
+
+```bash
+npm run dev:ext
+```
+
+**Load the Extension (manual)**
+1. Build:
+
+```bash
+npm run build
+```
+
+2. Open Chrome -> `chrome://extensions`
+3. Enable Developer mode
+4. Click ��Load unpacked�� and select `dist`
+
+**Usage**
+- Click the toolbar icon to open the Side Panel
+- Add items and edit titles / statuses
+- Click an item to expand history, then add time + description
+- Use the top-right menu to configure status options
+- Use the bottom icons to manually load / save data
+
+**Project Structure**
+- `src/sidepanel`: Side Panel UI and state management
+- `src/background`: Service worker (Side Panel behavior + context menu)
+- `public/manifest.json`: Extension manifest
+- `scripts/reload-extension.ts`: Watch `dist` and auto reload
+
+**Customizable**
+- Context menu links: `src/background/constants/contextMenus.ts`
+- Auto-reload extension name: `scripts/reload-extension.ts` -> `EXTENSION_NAME`
+
+**Scripts**
+- `npm run dev`: Vite build watch
+- `npm run build`: Production build
+- `npm run preview`: Preview build
+- `npm run lint` / `npm run lint:fix`
+- `npm run format`
+- `npm run watch:reload`: Watch `dist` and reload extension
+- `npm run start`: Open Chrome + dev (macOS only, uses `scripts/open-chrome.sh`)
+
+**Notes**
+- `scripts/open-chrome.sh` is macOS-only. On Windows / Linux, start Chrome with `--remote-debugging-port=9222` manually.
+
