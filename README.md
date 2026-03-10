@@ -1,26 +1,26 @@
-# Status Notepad Sidebar
+# AI Prompt Workspace
 
-A lightweight Chrome Side Panel extension for tracking tasks, statuses, and history notes. It supports pinning, drag-and-drop ordering, customizable status options, and timeline entries. Data is stored in `chrome.storage`.
+A lightweight Chrome Side Panel extension for collecting, organizing, and reusing AI prompts. Prompts are saved to `chrome.storage` and can be tagged, filtered, pinned, and exported.
 
-**Great for**
-- Keeping quick notes while browsing
-- Tracking item status and progress (e.g., In Progress, Done, Blocked)
+**Great For**
+- Saving useful prompts while browsing
+- Organizing prompt snippets by tags and sources
+- Quick reuse with copy and pin actions
 
 **Key Features**
-- Side Panel note list
-- Customizable status labels
-- Pinned / unpinned sections
-- Drag-and-drop sorting within each section
-- History entries with time + description
-- Manual load / save to `chrome.storage`
-- Action context menu links
+- Side Panel prompt list
+- Tag creation and filtering
+- Source filtering (ChatGPT / Claude / Gemini / custom)
+- Sort by pinned, created time, content, or source
+- Pin and template toggles
+- Copy prompt content and track last used time
+- Export filtered prompts to Markdown
+- Context menu: add prompt from selected text
 
 **Tech Stack**
 - React 19 + TypeScript
 - Vite 6
 - Tailwind CSS 4
-- @dnd-kit (drag-and-drop)
-- flatpickr (date/time picker)
 - dayjs (time utilities)
 
 **Requirements**
@@ -40,19 +40,7 @@ npm install
 npm run dev
 ```
 
-3. Auto-reload the extension on build changes (requires Chrome remote debugging)
-
-```bash
-npm run watch:reload
-```
-
-Or use both together:
-
-```bash
-npm run dev:ext
-```
-
-**Load the Extension (manual)**
+**Load The Extension (manual)**
 1. Build:
 
 ```bash
@@ -61,34 +49,28 @@ npm run build
 
 2. Open Chrome -> `chrome://extensions`
 3. Enable Developer mode
-4. Click ��Load unpacked�� and select `dist`
+4. Click "Load unpacked" and select `dist`
 
 **Usage**
 - Click the toolbar icon to open the Side Panel
-- Add items and edit titles / statuses
-- Click an item to expand history, then add time + description
-- Use the top-right menu to configure status options
-- Use the bottom icons to manually load / save data
+- Use the browser selection context menu "Add Prompt" to save text
+- Filter by tags and sources, or search by content
+- Use the action buttons to copy, pin, or delete
+- Export the current filtered list to Markdown
 
 **Project Structure**
 - `src/sidepanel`: Side Panel UI and state management
 - `src/background`: Service worker (Side Panel behavior + context menu)
 - `public/manifest.json`: Extension manifest
-- `scripts/reload-extension.ts`: Watch `dist` and auto reload
+- `side_panel.html`: Side panel entry
 
 **Customizable**
 - Context menu links: `src/background/constants/contextMenus.ts`
-- Auto-reload extension name: `scripts/reload-extension.ts` -> `EXTENSION_NAME`
 
 **Scripts**
-- `npm run dev`: Vite build watch
+- `npm run dev` / `npm run dev:start`: Vite build watch
+- `npm run watch`: Vite build watch
 - `npm run build`: Production build
 - `npm run preview`: Preview build
 - `npm run lint` / `npm run lint:fix`
 - `npm run format`
-- `npm run watch:reload`: Watch `dist` and reload extension
-- `npm run start`: Open Chrome + dev (macOS only, uses `scripts/open-chrome.sh`)
-
-**Notes**
-- `scripts/open-chrome.sh` is macOS-only. On Windows / Linux, start Chrome with `--remote-debugging-port=9222` manually.
-

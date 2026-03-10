@@ -12,6 +12,6 @@ export const ContextMenusOptions = [
 ];
 
 export const OutsideUrl: Record<string, string> = {
-  [ContextMenuId.visitGithub]: "https://example.com/a",
-  [ContextMenuId.chromeExtension]: "https://example.com/b",
+  [ContextMenuId.visitGithub]: "https://github.com/y0000ga/ai-prompt-workspace",
+  // [ContextMenuId.chromeExtension]: "https://example.com/b",
 };

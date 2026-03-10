@@ -19,7 +19,7 @@ export default defineConfig({
     outDir: "dist",
     rollupOptions: {
       input: {
-        sidepanel: resolve(__dirname, "index.html"),
+        sidepanel: resolve(__dirname, "side_panel.html"),
         background: resolve(__dirname, "src/background/index.ts"),
       },
       output: {

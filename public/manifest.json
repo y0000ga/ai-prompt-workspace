@@ -1,17 +1,32 @@
 {
   "manifest_version": 3,
-  "name": "Status Notepad Sidebar",
+  "name": "AI Prompt Workspace",
   "version": "1.0",
-  "description": "A lightweight Chrome extension for tracking task statuses and event handling in a side panel notepad.",
-  "permissions": ["storage", "sidePanel", "contextMenus"],
+  "icons": {
+    "16": "meta/favicon-16x16.png",
+    "32": "meta/favicon-32x32.png"
+  },
+  "description": "AI Prompt Workspace",
+  "permissions": [
+    "storage",
+    "sidePanel",
+    "contextMenus"
+  ],
   "action": {
-    "default_title": "Toggle Notes"
+    "default_title": "Toggle Workspace",
+    "default_icon": {
+      "16": "meta/favicon-16x16.png",
+      "32": "meta/favicon-32x32.png"
+    }
   },
   "background": {
-    "service_worker": "assets/background.js"
+    "service_worker": "assets/background.js",
+    "type": "module"
   },
   "side_panel": {
-    "default_path": "index.html"
+    "default_path": "side_panel.html"
   },
-  "host_permissions": ["<all_urls>"]
+  "host_permissions": [
+    "<all_urls>"
+  ]
 }

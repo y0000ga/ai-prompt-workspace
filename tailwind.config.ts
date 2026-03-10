@@ -1,7 +1,7 @@
 import { Config } from "tailwindcss";
 
 const Config: Config = {
-  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  content: ["./side_panel.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {},
   },

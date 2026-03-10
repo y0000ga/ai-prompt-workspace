@@ -5,9 +5,7 @@ import { Action, StatusOptionsActionType } from "./types";
 const statusOptionReducer = (state: ITag[], action: Action): ITag[] => {
   switch (action.type) {
     case StatusOptionsActionType.ADD: {
-      const exists = state.find(
-        (item) => item.label === action.payload.label && item.value === action.payload.value
-      );
+      const exists = state.find((item) => item.name === action.payload.name);
       return exists ? state : [...state, action.payload];
     }
     case StatusOptionsActionType.EDIT: {
