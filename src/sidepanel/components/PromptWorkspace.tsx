@@ -48,6 +48,7 @@ const PromptWorkspace = () => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(false);
   const [form, setForm] = useState<PromptFormState>(emptyForm);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -66,6 +67,10 @@ const PromptWorkspace = () => {
 
   const exportJson = (items: IPrompt[], filename: string) => {
     downloadText(JSON.stringify(items, null, 2), filename, "application/json");
+  };
+
+  const exportMarkdown = (items: IPrompt[], filename: string) => {
+    downloadText(generateMarkdown(items), filename, "text/markdown");
   };
 
   const importJson = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -92,7 +97,7 @@ const PromptWorkspace = () => {
             tags: (item.tags ?? []).map((tag) => ({ name: tag.name })),
             createdAt: item.createdAt ?? Date.now(),
             sourceUrl: item.sourceUrl ?? "",
-            site: item.site ?? "custom",
+            site: item.site ?? Site.Custom,
             isPinned: Boolean(item.isPinned),
             lastUsedAt: item.lastUsedAt ?? Date.now(),
             isTemplate: Boolean(item.isTemplate),
@@ -142,7 +147,7 @@ const PromptWorkspace = () => {
       tags: normalizeTags(form.tags),
       createdAt: current?.createdAt ?? Date.now(),
       sourceUrl: form.sourceUrl.trim(),
-      site: form.site.trim() || "custom",
+      site: form.site || Site.Custom,
       isPinned: form.isPinned,
       lastUsedAt: current?.lastUsedAt ?? Date.now(),
       isTemplate: form.isTemplate,
@@ -181,24 +186,128 @@ const PromptWorkspace = () => {
     exportJson(selectedPrompts, "selected-prompts.json");
   };
 
+  const handleBackup = () => {
+    exportJson(prompts, "prompts-backup.json");
+  };
+
+  const handleExportMarkdown = () => {
+    exportMarkdown(prompts, "prompts.md");
+  };
+
+  const bulkActionButtons = [
+    {
+      title: "Pin selected",
+      iconClassName: "icon-[mdi--pin] text-zinc-50",
+      buttonClassName: "bg-gray-600",
+      onClick: () => applyBulkEdit({ isPinned: true }),
+    },
+    {
+      title: "Unpin selected",
+      iconClassName: "icon-[mdi--pin-off] text-zinc-50",
+      buttonClassName: "bg-gray-600",
+      onClick: () => applyBulkEdit({ isPinned: false }),
+    },
+    {
+      title: "Mark selected as template",
+      iconClassName: "icon-[mdi--page-layout-body] text-zinc-50",
+      buttonClassName: "bg-gray-600",
+      onClick: () => applyBulkEdit({ isTemplate: true }),
+    },
+    {
+      title: "Unmark selected as template",
+      iconClassName: "icon-[mdi--page-layout-body] text-zinc-50 opacity-50",
+      buttonClassName: "bg-gray-600",
+      onClick: () => applyBulkEdit({ isTemplate: false }),
+    },
+    {
+      title: "Export selected JSON",
+      iconClassName: "icon-[mdi--content-copy] text-zinc-50",
+      buttonClassName: "bg-gray-600",
+      onClick: handleBulkExportJson,
+    },
+    {
+      title: "Delete selected",
+      iconClassName: "icon-[mdi--trash-can] text-zinc-50",
+      buttonClassName: "bg-red-600",
+      onClick: handleDeleteSelected,
+    },
+  ];
+
+  const actionButtons = [
+    {
+      label: "Create",
+      onClick: openCreateForm,
+    },
+    {
+      label: "Import",
+      onClick: () => fileInputRef.current?.click(),
+    },
+    {
+      label: "Backup",
+      onClick: handleBackup,
+    },
+    {
+      label: "Export MD",
+      onClick: handleExportMarkdown,
+    },
+  ];
+
   return (
     <div className="flex h-screen max-h-screen flex-1 flex-col gap-4 overflow-hidden bg-zinc-50 py-4">
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between px-4">
-          <button className="rounded-full border bg-gray-600 p-2 text-sm" onClick={openCreateForm}>
-            <div className="icon-[mdi--plus] text-zinc-50" />
+        <div className="flex flex-col gap-3 px-4">
+          <button
+            type="button"
+            className="flex items-center justify-between rounded border bg-white px-3 py-2 text-sm shadow"
+            onClick={() => setIsQuickActionsOpen((prev) => !prev)}
+          >
+            <span>Actions</span>
+            <span className="text-xs text-zinc-500">{isQuickActionsOpen ? "Hide" : "Show"}</span>
           </button>
 
+          {isQuickActionsOpen && (
+            <div className="grid grid-cols-4 gap-2 rounded border bg-white p-2 shadow">
+              {actionButtons.map(({ label, onClick }) => (
+                <button
+                  key={label}
+                  type="button"
+                  className="rounded border bg-zinc-50 px-3 py-2 text-sm"
+                  onClick={onClick}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+
           {selectedIds.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 rounded border bg-white px-2 py-1 text-sm shadow">
-              <span>{selectedIds.length} selected</span>
-              <button onClick={() => applyBulkEdit({ isPinned: true })}>Pin</button>
-              <button onClick={() => applyBulkEdit({ isPinned: false })}>Unpin</button>
-              <button onClick={() => applyBulkEdit({ isTemplate: true })}>Template</button>
-              <button onClick={() => applyBulkEdit({ isTemplate: false })}>Un-template</button>
-              <button onClick={handleBulkExportJson}>Export JSON</button>
-              <button onClick={handleDeleteSelected}>Delete</button>
-              <button onClick={clearSelection}>Clear</button>
+            <div className="rounded border bg-white p-3 text-sm shadow">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="font-medium">{selectedIds.length} selected</span>
+                <button
+                  type="button"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border bg-gray-600 text-xs"
+                  title="Clear selection"
+                  aria-label="Clear selection"
+                  onClick={clearSelection}
+                >
+                  <div className="icon-[mdi--close] text-zinc-50" />
+                </button>
+              </div>
+              <div className="flex gap-2">
+                {bulkActionButtons.map(({ title, iconClassName, buttonClassName, onClick }) => (
+                  <button
+                    key={title}
+                    type="button"
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm ${buttonClassName}`}
+                    title={title}
+                    aria-label={title}
+                    onClick={onClick}
+                  >
+                    <div className={iconClassName} />
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>

@@ -1,4 +1,4 @@
-import { PropsWithChildren, useCallback, useEffect, useMemo, useReducer, useRef } from "react";
+import { PropsWithChildren, useCallback, useEffect, useReducer } from "react";
 
 import useChromeStorage from "@/sidepanel/hooks/useChromeStorage";
 import { ChromeStorage, IPrompt } from "@/sidepanel/types/common";
@@ -23,25 +23,31 @@ const PromptProvider = ({ children }: PropsWithChildren<{}>) => {
 
   const [state, dispatch] = useReducer(noteReducer, value);
 
-  const syncingFromStorageRef = useRef(false);
-
-  const serializedValue = useMemo(() => JSON.stringify(value), [value]);
-  const serializedState = useMemo(() => JSON.stringify(state), [state]);
-
   const add = useCallback(
-    (payload: IPrompt) => dispatch({ type: PromptActionType.ADD, payload }),
-    []
+    (payload: IPrompt) => {
+      const nextState = noteReducer(state, { type: PromptActionType.ADD, payload });
+      dispatch({ type: PromptActionType.ADD, payload });
+      handleSaveStorage(nextState);
+    },
+    [handleSaveStorage, state]
   );
 
   const edit = useCallback(
-    (id: IPrompt["id"], payload: IPrompt) =>
-      dispatch({ type: PromptActionType.EDIT, id, payload }),
-    []
+    (id: IPrompt["id"], payload: IPrompt) => {
+      const nextState = noteReducer(state, { type: PromptActionType.EDIT, id, payload });
+      dispatch({ type: PromptActionType.EDIT, id, payload });
+      handleSaveStorage(nextState);
+    },
+    [handleSaveStorage, state]
   );
 
   const remove = useCallback(
-    (id: IPrompt["id"]) => dispatch({ type: PromptActionType.DELETE, id }),
-    []
+    (id: IPrompt["id"]) => {
+      const nextState = noteReducer(state, { type: PromptActionType.DELETE, id });
+      dispatch({ type: PromptActionType.DELETE, id });
+      handleSaveStorage(nextState);
+    },
+    [handleSaveStorage, state]
   );
 
   const save = useCallback(() => {
@@ -50,25 +56,8 @@ const PromptProvider = ({ children }: PropsWithChildren<{}>) => {
 
   useEffect(() => {
     if (!isHydrated) return;
-    syncingFromStorageRef.current = true;
-    dispatch({ type: PromptActionType.SET, payload: value })
-
+    dispatch({ type: PromptActionType.SET, payload: value });
   }, [isHydrated, value]);
-
-  useEffect(() => {
-    if (!isHydrated || isLoading) return;
-
-    if (syncingFromStorageRef.current) {
-      if (serializedState === serializedValue) {
-        syncingFromStorageRef.current = false;
-      }
-      return;
-    }
-
-    if (serializedState === serializedValue) return;
-
-    handleSaveStorage(state);
-  }, [state, serializedState, serializedValue, isHydrated, isLoading, handleSaveStorage]);
 
   return (
     <PromptContext.Provider
