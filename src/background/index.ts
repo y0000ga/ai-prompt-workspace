@@ -26,8 +26,8 @@ chrome.contextMenus.onClicked.addListener((info) => {
   }
 });
 
-function getSiteName(url?: string): string {
-  if (!url) return "unknown";
+function getSiteName(url?: string) {
+  if (!url) return Site.Custom;
 
   try {
     const hostname = new URL(url).hostname;
@@ -42,9 +42,9 @@ function getSiteName(url?: string): string {
       return Site.Gemini;
     }
 
-    return hostname;
+    return Site.Custom;
   } catch {
-    return "unknown";
+    return Site.Custom;
   }
 }
 

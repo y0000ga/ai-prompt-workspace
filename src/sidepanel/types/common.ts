@@ -17,16 +17,17 @@ export interface IPrompt {
   tags: ITag[];
   createdAt: number;
   sourceUrl: string;
-  site: Site | string;
+  site: Site;
   isPinned: boolean
   lastUsedAt: number
   isTemplate: boolean
 }
 
 export enum Site {
-  ChatGPT = 'chatgpt',
-  Claude = 'claude',
-  Gemini = 'gemini',
+  ChatGPT = 'Chatgpt',
+  Claude = 'Claude',
+  Gemini = 'Gemini',
+  Custom = 'Custom'
 }
 
 export enum SortBy {

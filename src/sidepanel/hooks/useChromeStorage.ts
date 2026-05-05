@@ -1,13 +1,46 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 
 import { ChromeStorage } from "@/sidepanel/types/common";
 import { loadStorage, saveStorage, watchStorage } from "@utils/storage";
 
 const useChromeStorage = <T>({ defaultValue, key }: { defaultValue: T; key: ChromeStorage }) => {
-  const [value, setValue] = useState<T>(defaultValue);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const [state, dispatch] = useReducer(
+    (
+      current:
+        | { value: T; isLoading: boolean; isSaving: boolean; isHydrated: boolean }
+        | null,
+      action:
+        | { type: "SET_VALUE"; payload: T }
+        | { type: "SET_LOADING"; payload: boolean }
+        | { type: "SET_SAVING"; payload: boolean }
+        | { type: "SET_HYDRATED"; payload: boolean }
+    ) => {
+      const base = current ?? {
+        value: defaultValue,
+        isLoading: false,
+        isSaving: false,
+        isHydrated: false,
+      };
+
+      switch (action.type) {
+        case "SET_VALUE":
+          return { ...base, value: action.payload };
+        case "SET_LOADING":
+          return { ...base, isLoading: action.payload };
+        case "SET_SAVING":
+          return { ...base, isSaving: action.payload };
+        case "SET_HYDRATED":
+          return { ...base, isHydrated: action.payload };
+        default:
+          return base;
+      }
+    },
+    null
+  );
+  const value = state?.value ?? defaultValue;
+  const isLoading = state?.isLoading ?? false;
+  const isSaving = state?.isSaving ?? false;
+  const isHydrated = state?.isHydrated ?? false;
   const serializedRef = useRef<string>("");
   const valueRef = useRef<T>(defaultValue);
   const defaultRef = useRef<T>(defaultValue);
@@ -41,7 +74,7 @@ const useChromeStorage = <T>({ defaultValue, key }: { defaultValue: T; key: Chro
 
     const init = async () => {
       try {
-        setIsLoading(true);
+        dispatch({ type: "SET_LOADING", payload: true });
 
         unwatch = watchStorage<string>(key, (newValue) => {
           if (!isMounted) return;
@@ -49,7 +82,7 @@ const useChromeStorage = <T>({ defaultValue, key }: { defaultValue: T; key: Chro
           const nextSerialized = safeStringify(nextValue);
           if (nextSerialized === serializedRef.current) return;
           serializedRef.current = nextSerialized;
-          setValue(nextValue);
+          dispatch({ type: "SET_VALUE", payload: nextValue });
         });
 
         const loadedValue = await loadStorage(key);
@@ -59,14 +92,14 @@ const useChromeStorage = <T>({ defaultValue, key }: { defaultValue: T; key: Chro
         const nextSerialized = safeStringify(nextValue);
         if (nextSerialized !== serializedRef.current) {
           serializedRef.current = nextSerialized;
-          setValue(nextValue);
+          dispatch({ type: "SET_VALUE", payload: nextValue });
         }
-        setIsHydrated(true);
+        dispatch({ type: "SET_HYDRATED", payload: true });
       } catch (error) {
         console.error(error);
       } finally {
         if (isMounted) {
-          setIsLoading(false);
+          dispatch({ type: "SET_LOADING", payload: false });
         }
       }
     };
@@ -82,11 +115,11 @@ const useChromeStorage = <T>({ defaultValue, key }: { defaultValue: T; key: Chro
   const handleSaveStorage = useCallback(
     async (updatedValue: unknown[]) => {
       try {
-        setIsSaving(true);
+        dispatch({ type: "SET_SAVING", payload: true });
         await saveStorage({ key, value: JSON.stringify(updatedValue) });
       } catch (error) {
       } finally {
-        setIsSaving(false);
+        dispatch({ type: "SET_SAVING", payload: false });
       }
     },
     [key]
@@ -94,18 +127,18 @@ const useChromeStorage = <T>({ defaultValue, key }: { defaultValue: T; key: Chro
 
   const handleLoadStorage = useCallback(async () => {
     try {
-      setIsLoading(true);
+      dispatch({ type: "SET_LOADING", payload: true });
       const loadedValue = await loadStorage(key);
       if (loadedValue) {
-        setValue(JSON.parse(loadedValue));
+        dispatch({ type: "SET_VALUE", payload: JSON.parse(loadedValue) });
       } else {
-        setValue(defaultValue);
+        dispatch({ type: "SET_VALUE", payload: defaultValue });
       }
-      setIsHydrated(true);
+      dispatch({ type: "SET_HYDRATED", payload: true });
     } catch (error) {
       console.error(error);
     } finally {
-      setIsLoading(false);
+      dispatch({ type: "SET_LOADING", payload: false });
     }
   }, [key]);
 
@@ -114,7 +147,6 @@ const useChromeStorage = <T>({ defaultValue, key }: { defaultValue: T; key: Chro
     handleSaveStorage,
     handleLoadStorage,
     isLoading,
-    setValue,
     isSaving,
     isHydrated,
   };

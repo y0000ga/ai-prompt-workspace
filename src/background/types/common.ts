@@ -1,7 +1,8 @@
 export enum Site {
-    ChatGPT = 'chatgpt',
-    Claude = 'claude',
-    Gemini = 'gemini',
+    ChatGPT = 'Chatgpt',
+    Claude = 'Claude',
+    Gemini = 'Gemini',
+    Custom = 'Custom'
 }
 
 export interface IPrompt {
@@ -9,7 +10,7 @@ export interface IPrompt {
   content: string;
   createdAt: number;
   sourceUrl: string;
-  site: Site | string;
+  site: Site;
   tags: Array<unknown>;
   isPinned: boolean,
   lastUsedAt: number,
